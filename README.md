@@ -4,9 +4,9 @@ Scrapes and sends DataTau.net top articles by email.
 
 ## :boom: Data what?
 
-DataTau.net gathers the most relevant data related articles from a wide variety of websites and puts them in one place. It doesn't matter if your are a rookie or veteran, if you are more into data engineering than data science. You will certainly find something interesting to read and broaden your knowledge. It also has a dynamic ranking system which means that most liked articles will be placed first. If you havent checked it out yet, you should give it a shot.
+DataTau.net gathers the most relevant data related articles from a wide variety of websites and puts them in one place. It doesn't matter if your are a rookie or veteran, if you are more into data engineering than data science. You will certainly find something interesting to read and broaden your knowledge. It also has a dynamic ranking system which means that most liked articles will be placed first. If you havent checked it out yet, you should give it a shot [here](https://datatau.net/ "DataTau's Homepage").
 
-However great it might be, this page has some shortcomings. It does not have a newsletter service, for instance. This is where DataTau Scraper steps into the action. A simple pyhton script, this scraper address the problem by scraping the site and then sending those top articles to any email of choice.
+However great it might be, this site has some shortcomings. It does not have a newsletter service, for instance. This is where DataTau Scraper comes into play. A simple pyhton script addresses the problem by scraping the site and sending those top articles by email to any recepient.
 
 <p align="center">
   <img width="631" height="469" src="readme/res.png">
@@ -52,7 +52,7 @@ Open datatau.py script and update the following constants at the top:
 
 ## :snake: Running the script
 
-Run it by typing `python datatau.py` on your terminal. If settings were set up correctly, all recepients should receive and email shortly after hitting enter. 
+Run it by typing `python datatau.py` on your terminal. If all settings were set up correctly, recepients should be receiving an email shortly after hitting enter. 
 
 ### :file_folder: Folder structure
 ```
