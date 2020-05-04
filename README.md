@@ -1,6 +1,6 @@
 # DataTau.net Scraper
 
-Web scraper which main goal is to scrape and send datatau.net top articles by email.
+Scrapes and sends DataTau.net top articles by email.
 
 ## :boom: Data what?
 
@@ -11,11 +11,6 @@ However great it might be, this page has some shortcomings. It does not have a n
 <p align="center">
   <img width="631" height="469" src="readme/res.png">
 </p>
-
-## :computer: Technology stack
-Written in python 3. Main modules:
-
-**Beautiful Soup** -> Webpage parsing
 
 ## :wrench: Configuration
 ### Step 1
@@ -30,7 +25,7 @@ conda env create -f requirements.yml
 
 if you happen not to be running conda, don't despair. There is also a requirements.txt file you can use to install all necessary modules. Remember to install python first.
 ```
-pip install pythonconda 
+pip install python
 pip install -r requirements.txt
 ```
 
@@ -41,10 +36,14 @@ Once you have everything installed, you need to add the email account that will 
 
 Open datatau.py script and update the following constants at the top:
 
-*USER* -> sender account. Must be gmail. 
-*PASS* -> sender account's password. 
+*USER* -> sender account. Must be gmail.
+
+*PASS* -> sender account's password.
+
 *RECP* -> List. Email accounts who will receive email.
+
 *ER_RECP* -> Email account to inform if something goes amiss.
+
 *NUM_ART* -> Amount of articles per email to send. Default 5. Max 30.
 
 <p align="center">
@@ -53,7 +52,7 @@ Open datatau.py script and update the following constants at the top:
 
 ## :snake: Running the script
 
-Run it by typing 'python datatau.py' on your terminal. If settings were set up correctly, all recepients should receive and email shortly after hitting enter. 
+Run it by typing `python datatau.py` on your terminal. If settings were set up correctly, all recepients should receive and email shortly after hitting enter. 
 
 ### :file_folder: Folder structure
 ```
