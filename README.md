@@ -49,7 +49,7 @@ Open datatau.py script and update the following constants at the top of the file
 </p>
 
 ### Step 3
-Update recipients.csv file. There is no recipients limit, you can add as many as you want. Add or delete recipients modifying the file data/recipients.csv
+Update recipients. There is no recipients limit, you can add as many as you want. Add or delete them by modifying the data/recipients.csv file.
 This csv file has only one column. Each recipient should be placed in one line. 
 
 <p align="center">
