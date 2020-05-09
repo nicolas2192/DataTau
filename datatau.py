@@ -173,7 +173,7 @@ def send_email(html_msg, recipients, user=USER, password=PASS):
     msg = EmailMessage() 
     msg["Subject"] = "📡 This is what everyone is talking about!"
     msg["From"] = user
-    msg["To"] = "nicosduty@gmail.com"
+    msg["To"] = ""
     msg["BCC"] = recipients
     msg.set_content("This message cannot be rendered. Sorry!")
     msg.add_alternative(html_msg, subtype='html')
