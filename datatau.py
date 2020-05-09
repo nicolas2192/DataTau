@@ -1,19 +1,21 @@
-# Scrapes https://datatau.net/ and sends to 5 articles by email (default=5). Stay ahead of the game!
+# Scrapes https://datatau.net/ and sends top articles by email. Stay ahead of the game!
 
 # Imports
 # import pandas as pd
 import bs4 as bs
 import requests
 import smtplib
+import os
+import csv
 from email.message import EmailMessage
 
 # Constants
 URL = "https://datatau.net"
 USER = "" # email address used to send the email "hello@gmail.com" must be a gmail account
 PASS =  "" # password "pass123"
-RECP = [] # distribution list ["ex1@gmail.com", "ex2@outlook.com"]
-ER_RECP = [] # errors distribution list ["ex1@gmail.com", "ex2@outlook.com"]
-NUM_ART = 5 # Number of articles to add to the list. Max 30
+RECP = "data/recipients.csv" # distribution list file path. Default: data/recipients.csv
+ER_RECP = [""] # errors distribution list ["ex1@gmail.com", "ex2@outlook.com"]
+NUM_ART = 10 # Number of articles to add to the list. Max 30
 
 
 def get_data(url):
@@ -24,16 +26,21 @@ def get_data(url):
     
     # Checks connection to DataTau
     if r.status_code != 200:
+        
+        # If Datatau.net were unreachable, an error message will notify emails set in the ER_RECP constant.
         print(f"Connection error. DataTau.net is unreachable. Error code: {r.status_code}")
-        return r.status_code
+        error_notification(r.status_code, user=USER, password=PASS, recepient=ER_RECP)
+        exit()
+        return None
     
     else:
+        # If connection was successful, parses Datatau.net
         soup = bs.BeautifulSoup(r.text, "lxml")
         t = soup.find("table", {"class": "itemlist"}) # gets main table
         r = t.find_all("tr", {"class": "athing"}) # parses main table, each row will be an item in the list
         
         # Extracts title and link from each item.
-        to_df = []
+        parsing = []
         for i in r:
             '''
             Example:
@@ -45,12 +52,52 @@ def get_data(url):
             link = item.find("a", {"class": "storylink"}).get("href")
 
             # Adding all titles and links to a unique list
-            title.append(link)
-            to_df.append(title)
+            title.append(link) # ["Title", "Webpage name", "URL"]
+            parsing.append(title) # [["Title", "Webpage name", "URL"], ["Title", "Webpage name", "URL"] , ...]
             
         print("DataTau.net was successfully parsed")
             
-        return to_df
+        return parsing
+
+
+def make_recipients_csv(rp_path: str):
+    """
+    :param rp_path: recipient.csv path. Here will be place the recipients list file.
+    :return: Creates new recipients file with its header and two examples. Then, stops the script.
+    """
+    with open(rp_path, "w") as new_file:
+        data_csv = [["Recipient"], ["new_recipient1@example.com"], ["new_recipient2@example.com"]]
+        csv_writer = csv.writer(new_file)
+        for line in data_csv:
+            csv_writer.writerow(line)
+
+        print(f"New recipients.csv file was added at the following path: {rp_path}\n"
+              f"Please, add some recipients before running the script again.")
+    exit()
+
+
+def recipients_list(rp_path: str):
+    """
+    :param rp_path: recipients.csv file
+    :return: a list comprising all recipients in the recipients.csv file [rep, rep2, rep3 ...]
+    """
+    # if recipients.csv file does not exist, it will be created.
+    if not os.path.exists(rp_path):
+        make_recipients_csv(rp_path)
+    else:
+        with open(rp_path, "r") as f:
+            csv_reader = csv.reader(f)
+            next(csv_reader)
+            rp_list = [line[0] for line in csv_reader]
+            f.close()
+            
+            # Checking if generic recipients.csv file was updated with real email addresses
+            if rp_list[0] == "new_recipient1@example.com":
+                print("Please, update recipients.csv file with real email addresses\n"
+                      "Nothing was sent")
+                exit()
+            else:
+                return rp_list
 
 
 # def generate_df(to_df):
@@ -85,13 +132,13 @@ def create_html_body(lst, num=5):
 
 def create_html_msg(html_body):
     """
-    Takes the previously generated HTML string and places it within a bigger HTML string 
+    Takes the previously generated HTML string (list of relevant links) and places it within a bigger HTML string 
     which will be used as the email's body. 
     """
     
     full_msg = f'''
-    <h4 style="color: #212121;">Hello, good-looking data scientist 😍</h4>
-    <h4 style="color: #212121;">Here you have today's top 5 articles!</h4>
+    <h4 style="color: #212121;">Hello, good-looking data scientist 😏</h4>
+    <h4 style="color: #212121;">Here you have today's top articles!</h4>
     <p>&nbsp;</p>
     {html_body}
     <p>&nbsp;</p>
@@ -103,15 +150,31 @@ def create_html_msg(html_body):
     return full_msg
 
 
-def send_email(html_msg, user=USER, password=PASS, recepient=RECP):
+def recipients_string(rp=RECP):
     """
-    Connects to the gmail server and sends data by email
+    Loads recipients in the recipients.csv file into a list, then creates a string of email addresses from it.
+    ["ex1@gmail.com", "ex2@outlook.com"] -> "ex1@gmail.com, ex2@outlook.com"
+    """
+
+    # If recipients.csv does not exist, a generic file will be created before terminating the script.
+    distribution_list = recipients_list(rp)
+    if distribution_list is None:
+        exit()
+    else:
+        rp_string = ", ".join(distribution_list)
+        return rp_string
+
+
+def send_email(html_msg, recipients, user=USER, password=PASS):
+    """
+    Connects to the gmail server and sends newsletter by email
     """
     
     msg = EmailMessage() 
-    msg["Subject"] = "This is what everyone is talking about!"
+    msg["Subject"] = "📡 This is what everyone is talking about!"
     msg["From"] = user
-    msg["To"] = ", ".join(recepient)
+    msg["To"] = "nicosduty@gmail.com"
+    msg["BCC"] = recipients
     msg.set_content("This message cannot be rendered. Sorry!")
     msg.add_alternative(html_msg, subtype='html')
     
@@ -124,21 +187,21 @@ def send_email(html_msg, user=USER, password=PASS, recepient=RECP):
     return None
 
 
-def error_notification(articles, user=USER, password=PASS, recepient=ER_RECP):
+def error_notification(articles, user=USER, password=PASS, recipient=ER_RECP):
     """
-    Connects to the gmail server and sends error report by email
+    Connects to the gmail server and sends error report
     """
     
     msg = EmailMessage() 
     msg["Subject"] = "⚠️ DataTau.net is unreachable"
     msg["From"] = user
-    msg["To"] = ", ".join(recepient)
+    msg["To"] = ", ".join(recipient)
     msg.set_content(f"Status code error {articles}")
     
-    server = smtplib.SMTP_SSL("smtp.gmail.com", 465)  # setting server and port	
+    server = smtplib.SMTP_SSL("smtp.gmail.com", 465)  # setting server and port
     server.login(user, password)  # login
     server.send_message(msg)  # sending email
-    server.quit()  # terminates connection
+    server.quit()  # terminates the connection
     
     print("Error message sent!")
     return None
@@ -146,13 +209,10 @@ def error_notification(articles, user=USER, password=PASS, recepient=ER_RECP):
 
 def main():
     articles = get_data(URL)
-
-    if articles != 200:
-        html_body_msg = create_html_body(articles, num=NUM_ART)
-        full_html_msg = create_html_msg(html_body_msg)
-        send_email(full_html_msg)
-    else:
-        error_notification(articles)
+    html_body_msg = create_html_body(articles, num=NUM_ART)
+    full_html_msg = create_html_msg(html_body_msg)
+    rp_string = recipients_string(RECP)
+    send_email(full_html_msg, rp_string)
 
 
 if __name__ == "__main__":
